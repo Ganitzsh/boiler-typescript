@@ -1,13 +1,16 @@
 {
   "env": {
     "es2021": true,
-    "node": true
+    "node": true,
+    "browser": true
   },
   "parserOptions": {
     "project": "tsconfig.json",
     "ecmaVersion": "latest",
     "sourceType": "module"
   },
-  "extends": ["airbnb-base", "airbnb-typescript/base"],
-  "rules": {}
+  "extends": ["airbnb-base", "airbnb-typescript/base", "prettier"],
+  "rules": {
+    "no-param-reassign": 0
+  }
 }

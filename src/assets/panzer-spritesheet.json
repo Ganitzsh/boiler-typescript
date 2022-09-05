@@ -1,0 +1,69 @@
+{
+  "frames": {
+    "german_panzer4_merged1.png": {
+      "frame": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged2.png": {
+      "frame": { "x": 150, "y": 0, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged3.png": {
+      "frame": { "x": 300, "y": 0, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged4.png": {
+      "frame": { "x": 0, "y": 150, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged5.png": {
+      "frame": { "x": 150, "y": 150, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged6.png": {
+      "frame": { "x": 300, "y": 150, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged7.png": {
+      "frame": { "x": 0, "y": 300, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    },
+    "german_panzer4_merged8.png": {
+      "frame": { "x": 150, "y": 300, "w": 150, "h": 150 },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": { "x": 0, "y": 0, "w": 150, "h": 150 },
+      "sourceSize": { "w": 150, "h": 150 }
+    }
+  },
+  "meta": {
+    "app": "https://www.codeandweb.com/texturepacker",
+    "version": "1.0",
+    "image": "panzer-tilesheet.png",
+    "format": "RGBA8888",
+    "size": { "w": 450, "h": 450 },
+    "scale": "1",
+    "smartupdate": "$TexturePacker:SmartUpdate:adbd07b4ccda52a38b24ce4eabdc23bd:b7bc0411bd5412c768e2922b92161064:2c2d552e407613a6a1387ea2e528887f$"
+  }
+}

@@ -1,0 +1,36 @@
+{"frames": {
+
+"isometric_pixel_0014.png":
+{
+	"frame": {"x":0,"y":0,"w":50,"h":50},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":50},
+	"sourceSize": {"w":50,"h":50}
+},
+"isometric_pixel_0025.png":
+{
+	"frame": {"x":50,"y":0,"w":50,"h":50},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":50},
+	"sourceSize": {"w":50,"h":50}
+},
+"isometric_pixel_0045.png":
+{
+	"frame": {"x":100,"y":0,"w":50,"h":50},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":50,"h":50},
+	"sourceSize": {"w":50,"h":50}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "world-spritesheet3.png",
+	"format": "RGBA8888",
+	"size": {"w":150,"h":50},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:55665c66ca7f2bb24a63075dfd643fb5:45c8dcb528ded39e586f0d0fa97ffc08:9ec6600dd246ada8e5bf754785131aae$"
+}
+}

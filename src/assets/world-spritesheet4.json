@@ -1,0 +1,36 @@
+{"frames": {
+
+"grass.png":
+{
+	"frame": {"x":0,"y":0,"w":100,"h":65},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":65},
+	"sourceSize": {"w":100,"h":65}
+},
+"lot.png":
+{
+	"frame": {"x":0,"y":65,"w":100,"h":66},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":66},
+	"sourceSize": {"w":100,"h":66}
+},
+"water.png":
+{
+	"frame": {"x":0,"y":131,"w":100,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":100,"h":64},
+	"sourceSize": {"w":100,"h":64}
+}},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "world-spritesheet4.png",
+	"format": "RGBA8888",
+	"size": {"w":100,"h":195},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:21260f1c3b6248620dcc9e794322c840:63e7596069cae856bffa256c51604b00:64c76ab54dce0aab9172334659696d47$"
+}
+}

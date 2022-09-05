@@ -28,6 +28,9 @@
   "language": "en-US",
   "version": "0.2",
   "words": [
+    "spritesheet",
+    "tilesheet",
+    "pixi",
     "nodemon",
     "anthos",
     "autoscaler",
