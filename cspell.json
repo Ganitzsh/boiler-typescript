@@ -28,6 +28,7 @@
   "language": "en-US",
   "version": "0.2",
   "words": [
+    "tilemap",
     "spritesheet",
     "tilesheet",
     "pixi",
