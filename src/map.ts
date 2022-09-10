@@ -1,15 +1,14 @@
 import * as PIXI from 'pixi.js';
 import * as PIXILayers from '@pixi/layers';
 
-import { Vec2f } from './geometry';
+import { computeIsometricCoordinates, Vec2f } from './geometry';
 import { TileIndex, TileMap } from './tilemap';
 
 interface Entity {
   position: Vec2f;
   drawable: {
     container: PIXI.Container;
-    group: PIXILayers.Group;
-    layer: PIXILayers.Layer;
+    sprite: PIXI.Sprite;
   };
 }
 
@@ -76,8 +75,24 @@ const renderGround = (
   return groundContainer;
 };
 
-const renderEntities = (entities: Entity[]): PIXI.Container => {
+const renderEntities = (entities: Entity[], ground: Ground): PIXI.Container => {
   const container = new PIXI.Container();
+
+  const { tileMap } = ground;
+  const { tiles } = tileMap;
+  const { height: tileHeight, width: tileWidth } = tiles;
+
+  for (const entity of entities) {
+    const { x, y } = computeIsometricCoordinates(
+      entity.position,
+      tileHeight,
+      tileWidth,
+    );
+
+    entity.drawable.sprite.setTransform(x, y);
+
+    container.addChild(entity.drawable.container);
+  }
 
   console.log('Render entities', entities);
 
@@ -92,7 +107,7 @@ const renderFloor = (
   const container = new PIXI.Container();
 
   container.addChild(renderGround(floor.ground, floorNumber, base));
-  renderEntities(floor.entities);
+  container.addChild(renderEntities(floor.entities, floor.ground));
 
   return container;
 };

@@ -1,5 +1,4 @@
 import * as PIXI from 'pixi.js';
-import * as PIXILayers from '@pixi/layers';
 
 import {
   angleMap,
@@ -18,8 +17,6 @@ export interface PlayerDrawable {
   idleTextures: Record<Direction, PIXI.Texture>;
   animationTextures: Record<Direction, PIXI.Texture[]>;
   animatedSprite: PIXI.AnimatedSprite;
-  layer: PIXILayers.Layer;
-  group: PIXILayers.Group;
   container: PIXI.Container;
 }
 
@@ -71,6 +68,33 @@ export const updatePlayerDrawable = (
   gizmo.pivot = sprite.anchor;
   gizmo.position = sprite.position;
   gizmo.angle = angleMap[player.direction];
+};
+
+export enum Rotation {
+  Clockwise,
+  Anticlockwise,
+}
+
+export const rotatePlayer = (player: Player, rotation: Rotation): void => {
+  player.direction += rotation === Rotation.Clockwise ? 1 : -1;
+
+  if (player.direction > Direction.SouthEast) {
+    player.direction = Direction.East;
+  }
+
+  if ((player.direction as number) === -1) {
+    player.direction = Direction.SouthEast;
+  }
+
+  const wasPlaying = player.drawable.animatedSprite.playing;
+
+  player.drawable.animatedSprite.textures =
+    player.drawable.animationTextures[player.direction];
+  if (wasPlaying) {
+    player.drawable.animatedSprite.play();
+  } else {
+    stopPlayer(player);
+  }
 };
 
 export const stopPlayer = (player: Player): void => {
@@ -144,7 +168,6 @@ export const updatePlayerState = (
 export const newPlayerDrawable = async (
   spritesheetImage: any,
   spritesheetData: any,
-  zIndex: number,
 ): Promise<PlayerDrawable> => {
   const spritesheetTexture = PIXI.Texture.from(spritesheetImage);
   const spritesheet = new PIXI.Spritesheet(spritesheetTexture, spritesheetData);
@@ -192,8 +215,6 @@ export const newPlayerDrawable = async (
   animatedSprite.pivot.y = 0.85;
 
   const gizmo = generateGizmo();
-  const group = new PIXILayers.Group(zIndex);
-  const layer = new PIXILayers.Layer(group);
   const container = new PIXI.Container();
 
   container.addChild(animatedSprite);
@@ -206,8 +227,6 @@ export const newPlayerDrawable = async (
     gizmo,
     idleTextures,
     spritesheet,
-    group,
-    layer,
     container,
   };
 };

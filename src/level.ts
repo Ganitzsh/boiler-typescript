@@ -15,7 +15,9 @@ export interface Level {
   map: Map;
   player: Player;
   currentFloor: number;
-  container: PIXI.Container;
+  drawable?: {
+    mapContainer: PIXI.Container;
+  };
 }
 
 export const renderLevel = (
@@ -31,17 +33,19 @@ export const renderLevel = (
   minimapContainer.x = 50;
   minimapContainer.y = 50;
 
-  mapContainer.addChild(playerContainer);
-
-  mapContainer.children.forEach(
-    (children) => (children.x += mapContainer.width / 2),
-  );
-
   stage.addChild(mapContainer);
+  stage.addChild(playerContainer);
   stage.addChild(minimapContainer);
 
-  mapContainer.x = window.innerWidth / 2 - mapContainer.width / 2;
-  mapContainer.y = window.innerHeight / 2 - mapContainer.height / 2;
+  const mapOffsetX = mapContainer.width / 2;
+
+  mapContainer.children.forEach((children) => (children.x += mapOffsetX));
+
+  playerContainer.x += mapOffsetX;
+
+  level.drawable = {
+    mapContainer,
+  };
 
   return mapContainer;
 };

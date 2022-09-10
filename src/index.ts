@@ -1,9 +1,10 @@
 import * as PIXI from 'pixi.js';
 import * as PIXILayers from '@pixi/layers';
 
-import { startPlayer, stopPlayer } from './player';
-import { Direction } from './geometry';
+import * as camera from './camera';
+import { stopPlayer } from './player';
 import { renderLevel, updateLevel } from './level';
+import { gameKeyboardControls, SupportedKeys } from './controls';
 
 import loadDemoLevel from './levels/demo';
 
@@ -21,37 +22,18 @@ const main = async (): Promise<void> => {
 
   app.stage = new PIXILayers.Stage();
 
-  const level = await loadDemoLevel(app.stage);
+  const level = await loadDemoLevel();
+
   const { player } = level;
 
   document.addEventListener('keydown', (event: KeyboardEvent) => {
-    if (event.key === 'a') {
-      if (player.speed === 0) {
-        startPlayer(player);
-      } else {
-        stopPlayer(player);
-      }
-    } else if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
-      player.direction += event.key === 'ArrowLeft' ? 1 : -1;
-
-      if (player.direction > Direction.SouthEast) {
-        player.direction = Direction.East;
-      }
-
-      if ((player.direction as number) === -1) {
-        player.direction = Direction.SouthEast;
-      }
-
-      const wasPlaying = player.drawable.animatedSprite.playing;
-
-      player.drawable.animatedSprite.textures =
-        player.drawable.animationTextures[player.direction];
-      if (wasPlaying) {
-        player.drawable.animatedSprite.play();
-      } else {
-        stopPlayer(player);
-      }
+    const keyboardInputHandler =
+      gameKeyboardControls[event.key as SupportedKeys];
+    if (keyboardInputHandler === undefined) {
+      return;
     }
+
+    keyboardInputHandler(level);
   });
 
   renderLevel(app.stage, level);
@@ -61,6 +43,10 @@ const main = async (): Promise<void> => {
   app.ticker.start();
   app.ticker.add((delta: number) => {
     updateLevel(level, delta);
+
+    if (camera.followPlayer === true) {
+      camera.centerPlayer(level);
+    }
   });
 };
 

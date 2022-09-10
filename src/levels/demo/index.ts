@@ -3,7 +3,7 @@ import * as PIXILayers from '@pixi/layers';
 
 import { Map } from '../../map';
 import { Level } from '../../level';
-import { loadTileMap, TileIndex, TileMapConfig } from '../../tilemap';
+import { loadTileMap, TileMapConfig } from '../../tilemap';
 
 import { loadMinimap, Minimap } from '../../minimap';
 import { Direction } from '../../geometry';
@@ -13,13 +13,7 @@ import levelSpritesheetImage from '../../assets/world-spritesheet4.png';
 import levelSpritesheetData from '../../assets/world-spritesheet4.json';
 import characterSpritesheetImage from '../../assets/walking-char.png';
 import characterSpritesheetData from '../../assets/walking-char.json';
-
-const floor1Layout: TileIndex[][] = [
-  [1, 1, 1, 1],
-  [1, 0, 0, 1],
-  [1, 0, 0, 1],
-  [1, 1, 1, 1],
-];
+import building1SpriteImage from '../../assets/building1-huge.png';
 
 const floor1TileMapConfig: TileMapConfig = {
   tiles: {
@@ -50,12 +44,39 @@ const floor1TileMapConfig: TileMapConfig = {
   },
 };
 
-export default async (stage: PIXI.Container): Promise<Level> => {
+const newBuilding1Drawable = (): {
+  sprite: PIXI.Sprite;
+  container: PIXI.Container;
+} => {
+  const container = new PIXI.Container();
+  const sprite = PIXI.Sprite.from(building1SpriteImage);
+
+  sprite.anchor.x = 0.5;
+  sprite.anchor.y = 0.5;
+
+  container.addChild(sprite);
+
+  return {
+    container,
+    sprite,
+  };
+};
+
+export default async (): Promise<Level> => {
   const tileMapFloor1 = loadTileMap(floor1TileMapConfig);
 
+  const floor1Size = {
+    width: 50,
+    height: 50,
+  };
+  const floor1Layout = new Array(floor1Size.height)
+    .fill(0)
+    .map(() => new Array(floor1Size.width).fill(1));
   const floor1Group = new PIXILayers.Group(0);
   const floor1Layer = new PIXILayers.Layer(floor1Group);
   const floor1Container = new PIXI.Container();
+
+  const building1Drawable = newBuilding1Drawable();
 
   const map: Map = {
     size: {
@@ -65,8 +86,8 @@ export default async (stage: PIXI.Container): Promise<Level> => {
     floors: [
       {
         size: {
-          width: 4,
-          height: 4,
+          width: floor1Size.width,
+          height: floor1Size.height,
         },
         ground: {
           tileMap: tileMapFloor1,
@@ -77,7 +98,15 @@ export default async (stage: PIXI.Container): Promise<Level> => {
             container: floor1Container,
           },
         },
-        entities: [],
+        entities: [
+          {
+            position: {
+              x: 4,
+              y: 4,
+            },
+            drawable: building1Drawable,
+          },
+        ],
       },
     ],
   };
@@ -95,7 +124,6 @@ export default async (stage: PIXI.Container): Promise<Level> => {
     drawable: await newPlayerDrawable(
       characterSpritesheetImage,
       characterSpritesheetData,
-      playerElevation,
     ),
     speed: 0,
   };
@@ -105,7 +133,6 @@ export default async (stage: PIXI.Container): Promise<Level> => {
     map,
     minimap,
     player,
-    container: stage,
     currentFloor: 0,
   };
 };
