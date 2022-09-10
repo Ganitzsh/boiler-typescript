@@ -1,45 +1,40 @@
 import * as PIXI from 'pixi.js';
 
-import { Level } from './level';
+import { Vec2f } from './geometry';
+import { Floor } from './map';
 import { Player } from './player';
 
-const MINIMAP_WIDTH = 100;
-const MINIMAP_HEIGHT = 100;
-
 export interface Minimap {
-  width: number;
-  height: number;
-  level: Level;
+  position: Vec2f;
+  size: {
+    width: number;
+    height: number;
+  };
   drawable: {
-    container: PIXI.Container;
     background: PIXI.Graphics;
     playerDot: PIXI.Graphics;
   };
 }
 
-export const updateMinimap = (minimap: Minimap): void => {
-  const { drawable, player, level } = minimap;
+export const updateMinimap = (
+  minimap: Minimap,
+  floor: Floor,
+  player: Player,
+): void => {
+  const { drawable } = minimap;
   const { playerDot } = drawable;
-  const { world } = level;
 
-  const ratioX = player.position.x / worldMap.width;
-  const ratioY = player.position.y / worldMap.height;
+  const ratioX = player.position.x / floor.size.width;
+  const ratioY = player.position.y / floor.size.height;
 
-  const minimapPlayerX = MINIMAP_WIDTH * ratioX;
-  const minimapPlayerY = MINIMAP_HEIGHT * ratioY;
+  const minimapPlayerX = minimap.size.width * ratioX;
+  const minimapPlayerY = minimap.size.height * ratioY;
 
   playerDot.position.x = minimapPlayerX;
   playerDot.position.y = minimapPlayerY;
 };
 
-export const loadMinimap = (
-  width: number,
-  height: number,
-  player: Player,
-  level: Level,
-): Minimap => {
-  const container = new PIXI.Container();
-
+export const loadMinimap = (width: number, height: number): Minimap => {
   const background = new PIXI.Graphics()
     .beginFill(0xff3300)
     .lineStyle(1, 0xffd900, 1)
@@ -51,24 +46,35 @@ export const loadMinimap = (
     .closePath()
     .endFill();
 
+  background.alpha = 0.5;
+
   const playerDot = new PIXI.Graphics()
     .lineStyle(0)
-    .beginFill(0xde3249, 1)
+    .beginFill(0x87ceeb, 1)
     .drawCircle(0, 0, 5)
     .endFill();
 
-  container.addChild(background);
-  container.addChild(playerDot);
-
   return {
-    width,
-    height,
-    player,
-    level,
+    position: {
+      x: 0,
+      y: 0,
+    },
+    size: {
+      width,
+      height,
+    },
     drawable: {
-      container,
       background,
       playerDot,
     },
   };
+};
+
+export const renderMinimap = (minimap: Minimap): PIXI.Container => {
+  const container = new PIXI.Container();
+
+  container.addChild(minimap.drawable.background);
+  container.addChild(minimap.drawable.playerDot);
+
+  return container;
 };

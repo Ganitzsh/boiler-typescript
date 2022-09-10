@@ -1,43 +1,72 @@
 import * as PIXI from 'pixi.js';
+import * as PIXILayers from '@pixi/layers';
 
-import { Level, computeIsometricCoordinates } from './level';
-import { angleMap, Direction, headingMap } from './trigonometry';
-import { generateGizmo, Position } from './world';
+import {
+  angleMap,
+  computeIsometricCoordinates,
+  Direction,
+  headingMap,
+  Vec2f,
+} from './geometry';
+import { Floor } from './map';
+import { generateGizmo } from './debug';
 
 export interface PlayerDrawable {
   gizmo: PIXI.Graphics;
   spritesheet: PIXI.Spritesheet;
-  anchorMap: Record<Direction, Position>;
+  anchorMap: Record<Direction, Vec2f>;
   idleTextures: Record<Direction, PIXI.Texture>;
   animationTextures: Record<Direction, PIXI.Texture[]>;
   animatedSprite: PIXI.AnimatedSprite;
+  layer: PIXILayers.Layer;
+  group: PIXILayers.Group;
+  container: PIXI.Container;
 }
 
 export interface Player {
-  position: Position;
+  position: Vec2f;
   direction: Direction;
   speed: number;
+  elevation: number;
   drawable: PlayerDrawable;
 }
 
-export const renderPlayer = (
-  container: PIXI.Container,
+export const renderPlayer = (player: Player, base?: Vec2f): PIXI.Container => {
+  const container = new PIXI.Container();
+
+  player.drawable.container.position.x = base?.x ?? 0;
+  player.drawable.container.position.y = base?.y ?? 0;
+
+  container.addChild(player.drawable.container);
+
+  return container;
+};
+
+export const updatePlayerDrawable = (
   player: Player,
+  tileHeight: number,
+  tileWidth: number,
 ): void => {
-  const { x, y } = computeIsometricCoordinates(player.position, level);
+  const { x, y } = computeIsometricCoordinates(
+    player.position,
+    tileHeight,
+    tileWidth,
+  );
   const { animatedSprite: sprite, gizmo } = player.drawable;
 
-  const roundedPosition: Position = {
-    x: Math.floor(player.position.x),
-    y: Math.floor(player.position.y),
-  };
+  // const roundedPosition: Vec2f = {
+  //   x: Math.floor(player.position.x),
+  //   y: Math.floor(player.position.y),
+  // };
+  //
+  // const tileValue = level.worldMap.data[roundedPosition.y][roundedPosition.x];
+  // const tile = level.tileMap.index[tileValue];
+  //
+  // const elevationOffset = tile.elevation * (level.tileMap.tileHeight / 8);
+  //
+  // sprite.setTransform(x, y - elevationOffset);
 
-  const tileValue = level.worldMap.data[roundedPosition.y][roundedPosition.x];
-  const tile = level.tileMap.index[tileValue];
-
-  const elevationOffset = tile.elevation * (level.tileMap.tileHeight / 8);
-
-  sprite.setTransform(x, y - elevationOffset);
+  sprite.setTransform(x, y);
 
   gizmo.pivot = sprite.anchor;
   gizmo.position = sprite.position;
@@ -45,6 +74,7 @@ export const renderPlayer = (
 };
 
 export const stopPlayer = (player: Player): void => {
+  console.log('Stop player');
   player.speed = 0;
 
   player.drawable.animatedSprite.stop();
@@ -53,44 +83,33 @@ export const stopPlayer = (player: Player): void => {
 };
 
 export const startPlayer = (player: Player): void => {
-  player.speed = 1;
+  player.speed = 0.02;
 
   player.drawable.animatedSprite.textures =
     player.drawable.animationTextures[player.direction];
   player.drawable.animatedSprite.play();
 };
 
-export const updatePlayer = (player: Player, level: Level): Player => {
-  const { worldMap } = level;
+export const updatePlayerState = (
+  player: Player,
+  floor: Floor,
+  delta: number,
+): Player => {
   const heading = headingMap[player.direction];
 
   const prevX = player.position.x;
   const prevY = player.position.y;
 
-  player.position.x += player.speed * 0.01 * heading.x;
-  player.position.y += player.speed * 0.01 * -heading.y;
-
-  const roundedPosition: Position = {
-    x: Math.floor(player.position.x),
-    y: Math.floor(player.position.y),
-  };
-
-  const tileValue = level.worldMap.data[roundedPosition.y][roundedPosition.x];
-  const newTile = level.tileMap.index[tileValue];
-
-  if (newTile === undefined || newTile.blockPlayer === true) {
-    player.position.x = prevX;
-    player.position.y = prevY;
-    stopPlayer(player);
-  }
+  player.position.x += player.speed * delta * heading.x;
+  player.position.y += player.speed * delta * -heading.y;
 
   if (player.position.x < 0) {
     player.position.x = 0;
     stopPlayer(player);
   }
 
-  if (player.position.x > worldMap.width) {
-    player.position.x = worldMap.width;
+  if (player.position.x > floor.size.width) {
+    player.position.x = floor.size.width;
     stopPlayer(player);
   }
 
@@ -99,8 +118,23 @@ export const updatePlayer = (player: Player, level: Level): Player => {
     stopPlayer(player);
   }
 
-  if (player.position.y > worldMap.height) {
-    player.position.y = worldMap.height;
+  if (player.position.y > floor.size.height) {
+    player.position.y = floor.size.height - 0.1;
+    stopPlayer(player);
+  }
+
+  const roundedPosition: Vec2f = {
+    x: Math.floor(player.position.x),
+    y: Math.floor(player.position.y),
+  };
+
+  const tileValue = floor.ground.layout[roundedPosition.y][roundedPosition.x];
+  const newTile = floor.ground.tileMap.tiles.index[tileValue];
+
+  if (newTile === undefined || newTile.blockPlayer === true) {
+    console.log('newTile undefined');
+    player.position.x = prevX;
+    player.position.y = prevY;
     stopPlayer(player);
   }
 
@@ -110,6 +144,7 @@ export const updatePlayer = (player: Player, level: Level): Player => {
 export const newPlayerDrawable = async (
   spritesheetImage: any,
   spritesheetData: any,
+  zIndex: number,
 ): Promise<PlayerDrawable> => {
   const spritesheetTexture = PIXI.Texture.from(spritesheetImage);
   const spritesheet = new PIXI.Spritesheet(spritesheetTexture, spritesheetData);
@@ -127,7 +162,7 @@ export const newPlayerDrawable = async (
     [Direction.SouthEast]: spritesheet.textures['char-se-01.png'],
   };
 
-  const anchorMap: Record<Direction, Position> = {
+  const anchorMap: Record<Direction, Vec2f> = {
     [Direction.East]: { x: 0.62, y: 0.56 },
     [Direction.NorthEast]: { x: 0.68, y: 0.5 },
     [Direction.North]: { x: 0.63, y: 0.4 },
@@ -156,12 +191,23 @@ export const newPlayerDrawable = async (
   animatedSprite.anchor.y = 0.85;
   animatedSprite.pivot.y = 0.85;
 
+  const gizmo = generateGizmo();
+  const group = new PIXILayers.Group(zIndex);
+  const layer = new PIXILayers.Layer(group);
+  const container = new PIXI.Container();
+
+  container.addChild(animatedSprite);
+  container.addChild(gizmo);
+
   return {
     anchorMap,
     animatedSprite,
     animationTextures,
-    gizmo: generateGizmo(),
+    gizmo,
     idleTextures,
     spritesheet,
+    group,
+    layer,
+    container,
   };
 };

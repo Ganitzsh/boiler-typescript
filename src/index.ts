@@ -1,46 +1,28 @@
 import * as PIXI from 'pixi.js';
+import * as PIXILayers from '@pixi/layers';
 
-import levelSpritesheetImage from './assets/world-spritesheet4.png';
-import levelSpritesheetData from './assets/world-spritesheet4.json';
+import { startPlayer, stopPlayer } from './player';
+import { Direction } from './geometry';
+import { renderLevel, updateLevel } from './level';
 
-import characterSpritesheetImage from './assets/walking-char.png';
-import characterSpritesheetData from './assets/walking-char.json';
-
-import { loadLevel } from './level';
-import { newPlayerDrawable, Player, renderPlayer, startPlayer, stopPlayer, updatePlayer } from './player';
-import { Direction } from './trigonometry';
-import { renderWorld, setupWorld } from './world';
-import { updateMinimap } from './minimap';
+import loadDemoLevel from './levels/demo';
 
 const main = async (): Promise<void> => {
+  PIXILayers.applyRendererMixin(PIXI.Renderer);
+
   const app = new PIXI.Application({
     width: window.innerWidth,
     height: window.innerHeight,
     antialias: true,
+    backgroundColor: 0x1099bb,
   });
 
-  const level = await loadLevel(levelSpritesheetImage, levelSpritesheetData);
+  document.body.appendChild(app.view);
 
-  const player: Player = {
-    position: {
-      x: 8,
-      y: 4,
-    },
-    direction: Direction.South,
-    drawable: await newPlayerDrawable(characterSpritesheetImage, characterSpritesheetData),
-    speed: 0,
-  };
+  app.stage = new PIXILayers.Stage();
 
-  stopPlayer(player);
-
-  const viewport = setupWorld(app, {
-    worldWidth: level.worldWidth,
-    worldHeight: level.worldHeight,
-  });
-
-  const { minimap } = renderWorld(app, viewport, player, level);
-
-  app.ticker.start();
+  const level = await loadDemoLevel(app.stage);
+  const { player } = level;
 
   document.addEventListener('keydown', (event: KeyboardEvent) => {
     if (event.key === 'a') {
@@ -62,7 +44,8 @@ const main = async (): Promise<void> => {
 
       const wasPlaying = player.drawable.animatedSprite.playing;
 
-      player.drawable.animatedSprite.textures = player.drawable.animationTextures[player.direction];
+      player.drawable.animatedSprite.textures =
+        player.drawable.animationTextures[player.direction];
       if (wasPlaying) {
         player.drawable.animatedSprite.play();
       } else {
@@ -71,11 +54,13 @@ const main = async (): Promise<void> => {
     }
   });
 
-  app.ticker.add(() => {
-    renderPlayer(player, level);
+  renderLevel(app.stage, level);
 
-    updatePlayer(player, level);
-    updateMinimap(minimap);
+  stopPlayer(player);
+
+  app.ticker.start();
+  app.ticker.add((delta: number) => {
+    updateLevel(level, delta);
   });
 };
 
