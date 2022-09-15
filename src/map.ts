@@ -1,25 +1,32 @@
 import * as PIXI from 'pixi.js';
-import * as PIXILayers from '@pixi/layers';
 
 import { computeIsometricCoordinates, Vec2f } from './geometry';
-import { TileIndex, TileMap } from './tilemap';
+import { Tile, TileIndex, TileMap } from './tilemap';
 
-interface Entity {
+export interface EntityDrawable {
+  container: PIXI.Container;
+  sprites: PIXI.Sprite[];
+}
+
+export interface Entity {
+  name: string;
   position: Vec2f;
-  drawable: {
-    container: PIXI.Container;
-    sprite: PIXI.Sprite;
+  size: {
+    width: number;
+    height: number;
   };
+  drawable: EntityDrawable;
+}
+
+export interface GroundDrawable {
+  container: PIXI.Container;
+  sprites: PIXI.Sprite[][];
 }
 
 export interface Ground {
   tileMap: TileMap;
   layout: TileIndex[][];
-  drawable: {
-    container: PIXI.Container;
-    layer: PIXILayers.Layer;
-    group: PIXILayers.Group;
-  };
+  drawable: GroundDrawable;
 }
 
 export interface Floor {
@@ -39,21 +46,34 @@ export interface Map {
   floors: Floor[];
 }
 
-const renderGround = (
-  ground: Ground,
-  floorNumber: number,
-  base?: Vec2f,
-): PIXI.Container => {
-  const { tileMap, layout } = ground;
+export const getTileAtPosition = (position: Vec2f, floor: Floor): Tile => {
+  const roundedPosition: Vec2f = {
+    x: Math.floor(position.x),
+    y: Math.floor(position.y),
+  };
+
+  const tileValue = floor.ground.layout[roundedPosition.y][roundedPosition.x];
+
+  return floor.ground.tileMap.tiles.index[tileValue];
+};
+
+export const loadGround = (
+  tileMap: TileMap,
+  layout: TileIndex[][],
+): GroundDrawable => {
   const { spritesheet, tiles } = tileMap;
   const { height: tileHeight, width: tileWidth } = tiles;
 
-  console.log(floorNumber);
+  const container = new PIXI.Container();
+  const sprites: PIXI.Sprite[][] = [];
 
-  const groundContainer = new PIXI.Container();
+  const fullWidth = tileMap.tiles.width * layout[0].length;
+
+  const baseX = fullWidth / 2;
 
   for (let y = 0; y < layout.length; y += 1) {
     const row = layout[y];
+    const rowSprites = [];
 
     for (let x = 0; x < row.length; x += 1) {
       const value = row[x];
@@ -64,60 +84,37 @@ const renderGround = (
       const offsetX = tileWidth / 2;
       const offsetY = tileHeight;
 
-      sprite.x = (base?.x ?? 0) - offsetX + x * offsetX - y * offsetY;
-      sprite.y =
-        (base?.y ?? 0) + y * offsetY + x * (offsetY / 2) - y * (offsetY / 2);
+      sprite.x = baseX + -offsetX + x * offsetX - y * offsetY;
+      sprite.y = y * offsetY + x * (offsetY / 2) - y * (offsetY / 2);
 
-      groundContainer.addChild(sprite);
+      container.addChild(sprite);
+      rowSprites.push(sprite);
     }
+
+    sprites.push(rowSprites);
   }
 
-  return groundContainer;
+  return {
+    container,
+    sprites,
+  };
 };
 
-const renderEntities = (entities: Entity[], ground: Ground): PIXI.Container => {
-  const container = new PIXI.Container();
+export const updateEntityDrawable = (
+  entity: Entity,
+  parentContainer: PIXI.Container,
+  tileHeight: number,
+  tileWidth: number,
+): void => {
+  const container = entity.drawable.container;
+  const { x, y } = computeIsometricCoordinates(
+    entity.position,
+    tileHeight,
+    tileWidth,
+  );
 
-  const { tileMap } = ground;
-  const { tiles } = tileMap;
-  const { height: tileHeight, width: tileWidth } = tiles;
-
-  for (const entity of entities) {
-    const { x, y } = computeIsometricCoordinates(
-      entity.position,
-      tileHeight,
-      tileWidth,
-    );
-
-    entity.drawable.sprite.setTransform(x, y);
-
-    container.addChild(entity.drawable.container);
-  }
-
-  console.log('Render entities', entities);
-
-  return container;
-};
-
-const renderFloor = (
-  floor: Floor,
-  floorNumber: number,
-  base?: Vec2f,
-): PIXI.Container => {
-  const container = new PIXI.Container();
-
-  container.addChild(renderGround(floor.ground, floorNumber, base));
-  container.addChild(renderEntities(floor.entities, floor.ground));
-
-  return container;
-};
-
-export const renderMap = (map: Map, base?: Vec2f): PIXI.Container => {
-  const container = new PIXI.Container();
-
-  for (let floorNumber = 0; floorNumber < map.floors.length; floorNumber += 1) {
-    container.addChild(renderFloor(map.floors[floorNumber], floorNumber, base));
-  }
-
-  return container;
+  container.position.set(
+    parentContainer.x + x + parentContainer.width / 2,
+    parentContainer.y + y,
+  );
 };

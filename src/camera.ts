@@ -1,15 +1,15 @@
 import { Level } from './level';
 
-export let followPlayer = true;
+export let followPlayer = false;
 
 export const triggerFollowPlayer = (): void => {
   followPlayer = !followPlayer;
-  console.log(followPlayer);
+  console.log('Follow player =', followPlayer);
 };
 
-export const centerPlayer = (level: Level): void => {
-  const mapContainer = level.drawable?.mapContainer;
-  const player = level.player;
+export const centerMap = (level: Level): void => {
+  const floor = level.map.floors[level.currentFloor];
+  const mapContainer = floor.ground.drawable.container;
 
   if (mapContainer === undefined) {
     return;
@@ -25,15 +25,27 @@ export const centerPlayer = (level: Level): void => {
     y: window.innerHeight / 2,
   };
 
-  // const base = {
-  //   x: viewMiddle.x - offset.x,
-  //   y: viewMiddle.y - offset.y,
-  // };
+  mapContainer.position.set(viewMiddle.x - offset.x, viewMiddle.y - offset.y);
+};
 
-  mapContainer.setTransform(
-    viewMiddle.x - player.drawable.animatedSprite.x - offset.x,
-    viewMiddle.y - player.drawable.animatedSprite.y,
-  );
+export const centerPlayer = (level: Level): void => {
+  const floor = level.map.floors[level.currentFloor];
+  const mapContainer = floor.ground.drawable.container;
 
-  player.drawable.container.setTransform(mapContainer.x, mapContainer.y);
+  if (mapContainer === undefined) {
+    return;
+  }
+
+  const viewMiddle = {
+    x: window.innerWidth / 2,
+    y: window.innerHeight / 2,
+  };
+
+  const translateFromPlayer = {
+    x: viewMiddle.x - level.player.drawable.container.position.x,
+    y: viewMiddle.y - level.player.drawable.container.position.y,
+  };
+
+  mapContainer.x += translateFromPlayer.x;
+  mapContainer.y += translateFromPlayer.y;
 };

@@ -1,10 +1,8 @@
 import * as PIXI from 'pixi.js';
-import * as PIXILayers from '@pixi/layers';
 
-import { Map } from '../../map';
+import { EntityDrawable, Floor, loadGround, Map } from '../../map';
 import { Level } from '../../level';
-import { loadTileMap, TileMapConfig } from '../../tilemap';
-
+import { loadTileMap } from '../../tilemap';
 import { loadMinimap, Minimap } from '../../minimap';
 import { Direction } from '../../geometry';
 import { newPlayerDrawable, Player } from '../../player';
@@ -13,41 +11,9 @@ import levelSpritesheetImage from '../../assets/world-spritesheet4.png';
 import levelSpritesheetData from '../../assets/world-spritesheet4.json';
 import characterSpritesheetImage from '../../assets/walking-char.png';
 import characterSpritesheetData from '../../assets/walking-char.json';
-import building1SpriteImage from '../../assets/building1-huge.png';
+import building1SpriteImage from '../../assets/building1.png';
 
-const floor1TileMapConfig: TileMapConfig = {
-  tiles: {
-    width: 99,
-    height: 49,
-    defaultIndex: 1,
-    index: {
-      0: {
-        name: 'water.png',
-        elevation: 0,
-        blockPlayer: true,
-      },
-      1: {
-        name: 'grass.png',
-        elevation: 1,
-        blockPlayer: false,
-      },
-      2: {
-        name: 'lot.png',
-        elevation: 2,
-        blockPlayer: false,
-      },
-    },
-  },
-  spritesheet: {
-    image: levelSpritesheetImage,
-    data: levelSpritesheetData,
-  },
-};
-
-const newBuilding1Drawable = (): {
-  sprite: PIXI.Sprite;
-  container: PIXI.Container;
-} => {
+const newBuilding1Drawable = (name?: string): EntityDrawable => {
   const container = new PIXI.Container();
   const sprite = PIXI.Sprite.from(building1SpriteImage);
 
@@ -56,59 +22,98 @@ const newBuilding1Drawable = (): {
 
   container.addChild(sprite);
 
+  if (name !== undefined) {
+    container.name = name;
+  }
+
   return {
     container,
-    sprite,
+    sprites: [sprite],
+  };
+};
+
+export const newFloor1 = (): Floor => {
+  const tileMap = loadTileMap({
+    tiles: {
+      width: 100,
+      height: 50,
+      defaultIndex: 1,
+      index: {
+        0: {
+          name: 'water.png',
+          elevation: 0,
+          blockPlayer: true,
+        },
+        1: {
+          name: 'grass.png',
+          elevation: 1,
+          blockPlayer: false,
+        },
+        2: {
+          name: 'lot.png',
+          elevation: 2,
+          blockPlayer: false,
+        },
+      },
+    },
+    spritesheet: {
+      image: levelSpritesheetImage,
+      data: levelSpritesheetData,
+    },
+  });
+
+  const size = {
+    width: 8,
+    height: 8,
+  };
+
+  const layout = new Array(size.height)
+    .fill(0)
+    .map(() => new Array(size.width).fill(1));
+
+  return {
+    size,
+    ground: {
+      tileMap,
+      layout,
+      drawable: loadGround(tileMap, layout),
+    },
+    entities: [
+      {
+        name: 'building1-1',
+        position: {
+          x: 4,
+          y: 4,
+        },
+        size: {
+          width: 2.1,
+          height: 3,
+        },
+        drawable: newBuilding1Drawable('building1-1'),
+      },
+      {
+        name: 'building1-2',
+        position: {
+          x: 0,
+          y: 4,
+        },
+        size: {
+          width: 2.1,
+          height: 3,
+        },
+        drawable: newBuilding1Drawable('building1-2'),
+      },
+    ],
   };
 };
 
 export default async (): Promise<Level> => {
-  const tileMapFloor1 = loadTileMap(floor1TileMapConfig);
-
-  const floor1Size = {
-    width: 50,
-    height: 50,
-  };
-  const floor1Layout = new Array(floor1Size.height)
-    .fill(0)
-    .map(() => new Array(floor1Size.width).fill(1));
-  const floor1Group = new PIXILayers.Group(0);
-  const floor1Layer = new PIXILayers.Layer(floor1Group);
-  const floor1Container = new PIXI.Container();
-
-  const building1Drawable = newBuilding1Drawable();
-
   const map: Map = {
     size: {
       width: 100,
       height: 100,
     },
-    floors: [
-      {
-        size: {
-          width: floor1Size.width,
-          height: floor1Size.height,
-        },
-        ground: {
-          tileMap: tileMapFloor1,
-          layout: floor1Layout,
-          drawable: {
-            group: floor1Group,
-            layer: floor1Layer,
-            container: floor1Container,
-          },
-        },
-        entities: [
-          {
-            position: {
-              x: 4,
-              y: 4,
-            },
-            drawable: building1Drawable,
-          },
-        ],
-      },
-    ],
+    floors: [newFloor1()],
   };
 
   const minimap: Minimap = loadMinimap(100, 100);
@@ -127,6 +132,8 @@ export default async (): Promise<Level> => {
     ),
     speed: 0,
   };
+
+  player.drawable.container.name = 'player';
 
   return {
     name: 'demo',

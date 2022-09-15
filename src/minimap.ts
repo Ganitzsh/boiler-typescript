@@ -13,6 +13,7 @@ export interface Minimap {
   drawable: {
     background: PIXI.Graphics;
     playerDot: PIXI.Graphics;
+    container: PIXI.Container;
   };
 }
 
@@ -35,6 +36,8 @@ export const updateMinimap = (
 };
 
 export const loadMinimap = (width: number, height: number): Minimap => {
+  const container = new PIXI.Container();
+
   const background = new PIXI.Graphics()
     .beginFill(0xff3300)
     .lineStyle(1, 0xffd900, 1)
@@ -54,6 +57,9 @@ export const loadMinimap = (width: number, height: number): Minimap => {
     .drawCircle(0, 0, 5)
     .endFill();
 
+  container.addChild(background);
+  container.addChild(playerDot);
+
   return {
     position: {
       x: 0,
@@ -66,15 +72,7 @@ export const loadMinimap = (width: number, height: number): Minimap => {
     drawable: {
       background,
       playerDot,
+      container,
     },
   };
-};
-
-export const renderMinimap = (minimap: Minimap): PIXI.Container => {
-  const container = new PIXI.Container();
-
-  container.addChild(minimap.drawable.background);
-  container.addChild(minimap.drawable.playerDot);
-
-  return container;
 };

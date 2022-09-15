@@ -16,8 +16,8 @@ export interface TileMap {
     defaultIndex: TileIndex;
   };
   spritesheet: {
-    image: any;
-    data: any;
+    image: string;
+    data: PIXI.ISpritesheetData;
     texture: PIXI.Texture;
     sheet: PIXI.Spritesheet;
   };
@@ -31,8 +31,8 @@ export interface TileMapConfig {
     defaultIndex: TileIndex;
   };
   spritesheet: {
-    image: any;
-    data: any;
+    image: string;
+    data: PIXI.ISpritesheetData;
   };
 }
 
