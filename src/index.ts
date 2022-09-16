@@ -38,7 +38,6 @@ const main = async (): Promise<void> => {
 
   renderLevel(app.stage, level);
 
-  camera.centerMap(level);
   stopPlayer(player);
 
   app.ticker.start();

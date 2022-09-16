@@ -2,16 +2,17 @@ import * as PIXI from 'pixi.js';
 
 import { EntityDrawable, Floor, loadGround, Map } from '../../map';
 import { Level } from '../../level';
-import { loadTileMap } from '../../tilemap';
+import { loadTileMap, TileIndex } from '../../tilemap';
 import { loadMinimap, Minimap } from '../../minimap';
 import { Direction } from '../../geometry';
 import { newPlayerDrawable, Player } from '../../player';
 
-import levelSpritesheetImage from '../../assets/world-spritesheet4.png';
-import levelSpritesheetData from '../../assets/world-spritesheet4.json';
+import levelSpritesheetImage from '../../assets/world-spritesheet9.png';
+import levelSpritesheetData from '../../assets/world-spritesheet9.json';
 import characterSpritesheetImage from '../../assets/walking-char.png';
 import characterSpritesheetData from '../../assets/walking-char.json';
 import building1SpriteImage from '../../assets/building1.png';
+import { newSquareBoundingBox } from '../../collision';
 
 const newBuilding1Drawable = (name?: string): EntityDrawable => {
   const container = new PIXI.Container();
@@ -33,43 +34,53 @@ const newBuilding1Drawable = (name?: string): EntityDrawable => {
 };
 
 export const newFloor1 = (): Floor => {
+  const tileWidth = 114;
+
   const tileMap = loadTileMap({
     tiles: {
-      width: 100,
-      height: 50,
+      width: tileWidth,
+      height: tileWidth / 2,
       defaultIndex: 1,
       index: {
         0: {
-          name: 'water.png',
-          elevation: 0,
-          blockPlayer: true,
+          name: 'water_center_N.png',
+          elevation: 1,
+          blockPlayer: false,
         },
         1: {
-          name: 'grass.png',
+          name: 'dirt_center_N.png',
           elevation: 1,
           blockPlayer: false,
         },
         2: {
-          name: 'lot.png',
-          elevation: 2,
+          name: 'dirt_low_N.png',
+          elevation: 0.75,
           blockPlayer: false,
         },
       },
     },
     spritesheet: {
       image: levelSpritesheetImage,
-      data: levelSpritesheetData,
+      data: levelSpritesheetData as any,
     },
   });
 
-  const size = {
-    width: 8,
-    height: 8,
-  };
+  const layout: TileIndex[][] = [
+    [0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [0, 1, 2, 2, 2, 1, 1, 0],
+    [0, 1, 2, 2, 2, 1, 1, 0],
+    [0, 1, 1, 1, 1, 1, 1, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0],
+  ];
+  console.log(newBuilding1Drawable());
 
-  const layout = new Array(size.height)
-    .fill(0)
-    .map(() => new Array(size.width).fill(1));
+  const size = {
+    width: layout[0].length,
+    height: layout.length,
+  };
 
   return {
     size,
@@ -79,30 +90,38 @@ export const newFloor1 = (): Floor => {
       drawable: loadGround(tileMap, layout),
     },
     entities: [
-      {
-        name: 'building1-1',
-        position: {
-          x: 4,
-          y: 4,
-        },
-        size: {
-          width: 2.1,
-          height: 3,
-        },
-        drawable: newBuilding1Drawable('building1-1'),
-      },
-      {
-        name: 'building1-2',
-        position: {
-          x: 0,
-          y: 4,
-        },
-        size: {
-          width: 2.1,
-          height: 3,
-        },
-        drawable: newBuilding1Drawable('building1-2'),
-      },
+      // {
+      //   name: 'building1-1',
+      //   position: {
+      //     x: 4,
+      //     y: 4,
+      //   },
+      //   size: building1Size,
+      //   boundingBox: newSquareBoundingBox(
+      //     {
+      //       x: 4,
+      //       y: 4,
+      //     },
+      //     building1Size,
+      //   ),
+      //   drawable: newBuilding1Drawable('building1-1'),
+      // },
+      // {
+      //   name: 'building1-2',
+      //   position: {
+      //     x: 0,
+      //     y: 4,
+      //   },
+      //   size: building1Size,
+      //   boundingBox: newSquareBoundingBox(
+      //     {
+      //       x: 0,
+      //       y: 4,
+      //     },
+      //     building1Size,
+      //   ),
+      //   drawable: newBuilding1Drawable('building1-2'),
+      // },
     ],
   };
 };
@@ -125,6 +144,16 @@ export default async (): Promise<Level> => {
       y: 0,
     },
     elevation: playerElevation,
+    boundingBox: newSquareBoundingBox(
+      {
+        x: 1,
+        y: 0,
+      },
+      {
+        width: 0.1,
+        height: 0.1,
+      },
+    ),
     direction: Direction.South,
     drawable: await newPlayerDrawable(
       characterSpritesheetImage,

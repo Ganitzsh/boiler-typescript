@@ -1,7 +1,8 @@
 import * as PIXI from 'pixi.js';
 
-import { computeIsometricCoordinates, Vec2f } from './geometry';
+import { computeIsometricCoordinates, Size, Vec2f } from './geometry';
 import { Tile, TileIndex, TileMap } from './tilemap';
+import { SquareBoundingBox } from './collision';
 
 export interface EntityDrawable {
   container: PIXI.Container;
@@ -11,10 +12,8 @@ export interface EntityDrawable {
 export interface Entity {
   name: string;
   position: Vec2f;
-  size: {
-    width: number;
-    height: number;
-  };
+  size: Size;
+  boundingBox: SquareBoundingBox;
   drawable: EntityDrawable;
 }
 
@@ -30,27 +29,32 @@ export interface Ground {
 }
 
 export interface Floor {
-  size: {
-    width: number;
-    height: number;
-  };
+  size: Size;
   ground: Ground;
   entities: Entity[];
 }
 
 export interface Map {
-  size: {
-    width: number;
-    height: number;
-  };
+  size: Size;
   floors: Floor[];
 }
 
+export const getTilePosition = (position: Vec2f): Vec2f => ({
+  x: Math.floor(position.x),
+  y: Math.floor(position.y),
+});
+
+export const getTileSpriteAtPosition = (
+  position: Vec2f,
+  floor: Floor,
+): PIXI.Sprite => {
+  const roundedPosition: Vec2f = getTilePosition(position);
+
+  return floor.ground.drawable.sprites[roundedPosition.y][roundedPosition.x];
+};
+
 export const getTileAtPosition = (position: Vec2f, floor: Floor): Tile => {
-  const roundedPosition: Vec2f = {
-    x: Math.floor(position.x),
-    y: Math.floor(position.y),
-  };
+  const roundedPosition: Vec2f = getTilePosition(position);
 
   const tileValue = floor.ground.layout[roundedPosition.y][roundedPosition.x];
 
@@ -67,10 +71,6 @@ export const loadGround = (
   const container = new PIXI.Container();
   const sprites: PIXI.Sprite[][] = [];
 
-  const fullWidth = tileMap.tiles.width * layout[0].length;
-
-  const baseX = fullWidth / 2;
-
   for (let y = 0; y < layout.length; y += 1) {
     const row = layout[y];
     const rowSprites = [];
@@ -78,16 +78,22 @@ export const loadGround = (
     for (let x = 0; x < row.length; x += 1) {
       const value = row[x];
       const tile = tileMap.tiles.index[value];
-
       const sprite = new PIXI.Sprite(spritesheet.sheet.textures[tile.name]);
 
-      const offsetX = tileWidth / 2;
-      const offsetY = tileHeight;
+      sprite.scale.set(0.5, 0.5);
+      sprite.name = `tile-${x}x${y}`;
+      const isoPos = computeIsometricCoordinates(
+        {
+          x,
+          y,
+        },
+        tileHeight,
+        tileWidth,
+      );
 
-      sprite.x = baseX + -offsetX + x * offsetX - y * offsetY;
-      sprite.y = y * offsetY + x * (offsetY / 2) - y * (offsetY / 2);
+      sprite.position.set(isoPos.x, isoPos.y - (sprite.height - tileHeight));
 
-      container.addChild(sprite);
+      // container.addChild(sprite);
       rowSprites.push(sprite);
     }
 
@@ -103,18 +109,20 @@ export const loadGround = (
 export const updateEntityDrawable = (
   entity: Entity,
   parentContainer: PIXI.Container,
+  // tileSprite: PIXI.Sprite,
   tileHeight: number,
   tileWidth: number,
 ): void => {
   const container = entity.drawable.container;
   const { x, y } = computeIsometricCoordinates(
     entity.position,
+    // tileSprite.height,
     tileHeight,
     tileWidth,
   );
 
   container.position.set(
-    parentContainer.x + x + parentContainer.width / 2,
+    -(tileWidth / 2) + parentContainer.x + x + parentContainer.width / 2,
     parentContainer.y + y,
   );
 };

@@ -1,3 +1,8 @@
+export interface Size {
+  width: number;
+  height: number;
+}
+
 export interface Vec2f {
   x: number;
   y: number;
@@ -36,32 +41,11 @@ export const headingMap: Record<Direction, Vec2f> = {
   [Direction.SouthEast]: { x: 1, y: -1 },
 };
 
-// const headings: Direction[] = [
-//   Direction.East,
-//   Direction.NorthEast,
-//   Direction.North,
-//   Direction.NorthWest,
-//   Direction.West,
-//   Direction.SouthWest,
-//   Direction.South,
-//   Direction.SouthEast,
-// ];
-
-// const getCardinalDirection = (vector: Vec2f): Direction => {
-//   const angle = Math.atan2(vector.y, vector.x);
-//   const octant = Math.round((8 * angle) / (2 * Math.PI) + 8) % 8;
-//
-//   return headings[octant];
-// };
-
 export const computeIsometricCoordinates = (
   position: Vec2f,
   tileHeight: number,
   tileWidth: number,
 ): Vec2f => {
-  // const baseX = worldWidth / 2;
-  // const baseY = worldHeight / 2 - (worldMap.height * tileMap.tileHeight) / 2;
-
   const isoX = (position.x - position.y) * (tileWidth / 2);
   const isoY = (position.x + position.y) * (tileHeight / 2);
 

@@ -1,0 +1,111 @@
+{
+  "frames": {
+    "dirt_center_N.png": {
+      "frame": {
+        "x": 0,
+        "y": 0,
+        "w": 233,
+        "h": 220
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 233,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 233,
+        "h": 220
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "grass_center_N.png": {
+      "frame": {
+        "x": 233,
+        "y": 0,
+        "w": 233,
+        "h": 220
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 233,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 233,
+        "h": 220
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "water_center_N.png": {
+      "frame": {
+        "x": 466,
+        "y": 0,
+        "w": 232,
+        "h": 220
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 232,
+        "h": 220
+      },
+      "sourceSize": {
+        "w": 232,
+        "h": 220
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    },
+    "dirt_low_N.png": {
+      "frame": {
+        "x": 698,
+        "y": 0,
+        "w": 232,
+        "h": 194
+      },
+      "rotated": false,
+      "trimmed": false,
+      "spriteSourceSize": {
+        "x": 0,
+        "y": 0,
+        "w": 232,
+        "h": 194
+      },
+      "sourceSize": {
+        "w": 232,
+        "h": 194
+      },
+      "pivot": {
+        "x": 0.5,
+        "y": 0.5
+      }
+    }
+  },
+  "meta": {
+    "app": "http://free-tex-packer.com",
+    "version": "0.6.7",
+    "image": "world-spritesheet9.png",
+    "format": "RGBA8888",
+    "size": {
+      "w": 930,
+      "h": 220
+    },
+    "scale": 1
+  }
+}

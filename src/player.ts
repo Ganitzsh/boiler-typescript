@@ -7,8 +7,10 @@ import {
   headingMap,
   Vec2f,
 } from './geometry';
-import { Floor, getTileAtPosition } from './map';
+import { Entity, Floor, getTileAtPosition } from './map';
 import { generateGizmo } from './debug';
+import { checkCollision, SquareBoundingBox } from './collision';
+import { Tile } from './tilemap';
 
 export interface PlayerDrawable {
   gizmo: PIXI.Graphics;
@@ -21,6 +23,7 @@ export interface PlayerDrawable {
 
 export interface Player {
   position: Vec2f;
+  boundingBox: SquareBoundingBox;
   direction: Direction;
   speed: number;
   elevation: number;
@@ -29,11 +32,13 @@ export interface Player {
 
 export const updatePlayerDrawable = (
   player: Player,
-  parentContainer: PIXI.Container,
-  tileHeight: number,
+  groundTile: Tile,
+  origin: Vec2f,
   tileWidth: number,
 ): void => {
   const { container, animatedSprite: sprite, gizmo } = player.drawable;
+  const tileHeight = tileWidth / 2;
+
   const { x, y } = computeIsometricCoordinates(
     player.position,
     tileHeight,
@@ -41,8 +46,8 @@ export const updatePlayerDrawable = (
   );
 
   container.position.set(
-    parentContainer.x + x + parentContainer.width / 2,
-    parentContainer.y + y,
+    origin.x + x + tileHeight,
+    origin.y + y - groundTile.elevation * tileHeight,
   );
 
   gizmo.pivot = sprite.anchor;
@@ -106,6 +111,21 @@ export const updatePlayerState = (
 
   player.position.x += player.speed * delta * heading.x;
   player.position.y += player.speed * delta * -heading.y;
+  player.boundingBox.position = player.position;
+
+  const collidingEntity = floor.entities.find((entity: Entity) =>
+    checkCollision(entity.boundingBox, player.boundingBox),
+  );
+
+  if (collidingEntity !== undefined) {
+    console.log('Player colliding with', collidingEntity.name);
+
+    player.position.x = prevX;
+    player.position.y = prevY;
+
+    stopPlayer(player);
+    return player;
+  }
 
   if (player.position.x < 0) {
     player.position.x = 0;

@@ -1,0 +1,61 @@
+{"frames": {
+
+"grass1.png":
+{
+	"frame": {"x":0,"y":0,"w":144,"h":98},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":144,"h":98},
+	"sourceSize": {"w":144,"h":98},
+	"anchor": {"x":0.5,"y":0.5}
+},
+"grass2.png":
+{
+	"frame": {"x":0,"y":98,"w":144,"h":98},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":144,"h":98},
+	"sourceSize": {"w":144,"h":98},
+	"anchor": {"x":0.5,"y":0.5}
+},
+"pine-tree1-1.png":
+{
+	"frame": {"x":92,"y":201,"w":92,"h":152},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":92,"h":152},
+	"sourceSize": {"w":92,"h":152},
+	"anchor": {"x":0.478261,"y":0.927632}
+},
+"pine-tree1-2.png":
+{
+	"frame": {"x":0,"y":201,"w":92,"h":143},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":92,"h":143},
+	"sourceSize": {"w":92,"h":143},
+	"anchor": {"x":0.478261,"y":0.916084}
+},
+"pine-tree2.png":
+{
+	"frame": {"x":144,"y":98,"w":91,"h":103},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":91,"h":103},
+	"sourceSize": {"w":91,"h":103},
+	"anchor": {"x":0.494505,"y":0.92233}
+}},
+"animations": {
+	"grass": ["grass1.png","grass2.png"],
+	"pine-tree1": ["pine-tree1-1.png","pine-tree1-2.png"]
+},
+"meta": {
+	"app": "https://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "world-spritesheet5.png",
+	"format": "RGBA8888",
+	"size": {"w":235,"h":353},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:83f99c379689c2fba06398d70d5fbc2b:e0798fb9712519abadf8cdd95353aaf3:09c631ff5254f63255e92478335bdfee$"
+}
+}
