@@ -5,8 +5,6 @@ import {
   Entity,
   getTileAtPosition,
   getTilePosition,
-  // getTilePosition,
-  // getTileSpriteAtPosition,
   Map,
   updateEntityDrawable,
 } from './map';
@@ -21,26 +19,65 @@ export interface Level {
   currentFloor: number;
 }
 
-export const renderLevel = (
-  stage: PIXI.Container,
-  level: Level,
-): PIXI.Container => {
-  console.log('Rendering level', level.name);
+const handlePlayerDepth = (level: Level): number => {
+  const { player } = level;
+  const floor = level.map.floors[level.currentFloor];
 
-  const depthGroup1 = new PIXILayers.Group(1, (sprite) => {
+  const roundedPosition = getTilePosition(player.position);
+  const tileAtPosition = getTileAtPosition(player.position, floor);
+
+  return (
+    tileAtPosition.elevation + 0.1 + roundedPosition.x + roundedPosition.y + 1
+  );
+};
+
+const handleEntityDepth = (level: Level, matchingEntity: Entity): number => {
+  const { player } = level;
+  const floor = level.map.floors[level.currentFloor];
+
+  const topRight = {
+    x: matchingEntity.position.x + matchingEntity.size.width,
+    y: matchingEntity.position.y,
+  };
+
+  const bottomLeft = {
+    x: matchingEntity.position.x,
+    y: matchingEntity.position.y + matchingEntity.size.height,
+  };
+
+  const tile = getTileAtPosition(matchingEntity.position, floor);
+
+  if (
+    (player.position.y >= topRight.y && player.position.x >= topRight.x) ||
+    (player.position.y >= bottomLeft.y && player.position.x >= bottomLeft.x)
+  ) {
+    return level.player.drawable.container.zOrder! - 0.1;
+  } else {
+    return tile.elevation + topRight.x + topRight.y + bottomLeft.y;
+  }
+};
+
+const handleTileDepth = (level: Level, spriteName: string): number => {
+  const floor = level.map.floors[level.currentFloor];
+  const coordFull = spriteName.split('-')[1];
+  const [xStr, yStr] = coordFull.split('x');
+  // const spriteTile = getTileAtPosition({ x, y }, floor);
+  const tilePosition = {
+    x: parseInt(xStr),
+    y: parseInt(yStr),
+  };
+
+  const tile = getTileAtPosition(tilePosition, floor);
+
+  return tile.elevation + tilePosition.x + tilePosition.y;
+};
+
+const sortDepth = (level: Level): ((sprite: PIXI.DisplayObject) => void) => {
+  return (sprite: PIXI.DisplayObject): void => {
     const floor = level.map.floors[level.currentFloor];
-    const player = level.player;
 
     if (sprite.name === 'player') {
-      const roundedPosition = getTilePosition(player.position);
-      const tileAtPosition = getTileAtPosition(player.position, floor);
-
-      sprite.zOrder =
-        tileAtPosition.elevation +
-        0.1 +
-        roundedPosition.x +
-        roundedPosition.y +
-        1;
+      sprite.zOrder = handlePlayerDepth(level);
       return;
     }
 
@@ -50,51 +87,25 @@ export const renderLevel = (
     );
 
     if (matchingEntity !== undefined) {
-      const topRight = {
-        x: matchingEntity.position.x + matchingEntity.size.width,
-        y: matchingEntity.position.y,
-      };
-
-      const bottomLeft = {
-        x: matchingEntity.position.x,
-        y: matchingEntity.position.y + matchingEntity.size.height,
-      };
-
-      const tile = getTileAtPosition(matchingEntity.position, floor);
-
-      if (
-        (player.position.y >= topRight.y && player.position.x >= topRight.x) ||
-        (player.position.y >= bottomLeft.y && player.position.x >= bottomLeft.x)
-      ) {
-        sprite.zOrder = level.player.drawable.container.zOrder! - 0.1;
-      } else {
-        sprite.zOrder = tile.elevation + topRight.x + topRight.y + bottomLeft.y;
-      }
-
+      sprite.zOrder = handleEntityDepth(level, matchingEntity);
       return;
     }
 
     if (sprite.name?.startsWith('tile-')) {
-      const coordFull = sprite.name.split('-')[1];
-      const [xStr, yStr] = coordFull.split('x');
-      // const spriteTile = getTileAtPosition({ x, y }, floor);
-      const tilePosition = {
-        x: parseInt(xStr),
-        y: parseInt(yStr),
-      };
-
-      const tile = getTileAtPosition(tilePosition, floor);
-
-      sprite.zOrder = tile.elevation + tilePosition.x + tilePosition.y;
-
+      sprite.zOrder = handleTileDepth(level, sprite.name);
       return;
     }
-  });
-  const depthGroup2 = new PIXILayers.Group(2, false);
+  };
+};
 
-  stage.sortableChildren = true;
-  stage.addChild(new PIXILayers.Layer(depthGroup1));
-  stage.addChild(new PIXILayers.Layer(depthGroup2));
+export const renderLevel = (
+  stage: PIXI.Container,
+  level: Level,
+): PIXI.Container => {
+  console.log('Rendering level', level.name);
+
+  const depthGroup1 = new PIXILayers.Group(1, sortDepth(level));
+  const depthGroup2 = new PIXILayers.Group(2, false);
 
   const { drawable: minimapDrawable } = level.minimap;
   const { drawable: playerDrawable } = level.player;
@@ -102,10 +113,14 @@ export const renderLevel = (
   const playerContainer = playerDrawable.container;
   const minimapContainer = minimapDrawable.container;
 
+  const floor = level.map.floors[level.currentFloor];
+
   minimapContainer.x = 50;
   minimapContainer.y = 50;
 
-  const floor = level.map.floors[level.currentFloor];
+  stage.sortableChildren = true;
+  stage.addChild(new PIXILayers.Layer(depthGroup1));
+  stage.addChild(new PIXILayers.Layer(depthGroup2));
 
   floor.ground.drawable.sprites.forEach((row: PIXI.Sprite[]) =>
     row.forEach((tileSprite: PIXI.Sprite) => {
@@ -137,7 +152,6 @@ export const updateLevel = (level: Level, delta: number): void => {
   updatePlayerState(player, floor, delta);
   updatePlayerDrawable(
     player,
-    // getTileSpriteAtPosition(player.position, floor),
     getTileAtPosition(player.position, floor),
     { x: 500, y: 200 },
     floor.ground.tileMap.tiles.width,
@@ -149,7 +163,6 @@ export const updateLevel = (level: Level, delta: number): void => {
     updateEntityDrawable(
       entity,
       getTileAtPosition(entity.position, floor),
-      // getTileSpriteAtPosition(entity.position, floor),
       { x: 500, y: 200 },
       floor.ground.tileMap.tiles.width,
     );
