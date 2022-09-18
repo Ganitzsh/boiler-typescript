@@ -41,11 +41,20 @@ export const centerPlayer = (level: Level): void => {
     y: window.innerHeight / 2,
   };
 
+  level.player.position = viewMiddle;
+
   const translateFromPlayer = {
     x: viewMiddle.x - level.player.drawable.container.position.x,
     y: viewMiddle.y - level.player.drawable.container.position.y,
   };
 
-  mapContainer.x += translateFromPlayer.x;
-  mapContainer.y += translateFromPlayer.y;
+  floor.ground.drawable.sprites.forEach((row) =>
+    row.forEach((sprite) => {
+      sprite.x += translateFromPlayer.x;
+      sprite.y += translateFromPlayer.y;
+    }),
+  );
+
+  // mapContainer.x += translateFromPlayer.x;
+  // mapContainer.y += translateFromPlayer.y;
 };

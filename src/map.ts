@@ -91,7 +91,10 @@ export const loadGround = (
         tileWidth,
       );
 
-      sprite.position.set(isoPos.x, isoPos.y - (sprite.height - tileHeight));
+      sprite.position.set(
+        500 + isoPos.x,
+        200 + isoPos.y - (sprite.height - tileHeight),
+      );
 
       // container.addChild(sprite);
       rowSprites.push(sprite);
@@ -108,21 +111,22 @@ export const loadGround = (
 
 export const updateEntityDrawable = (
   entity: Entity,
-  parentContainer: PIXI.Container,
+  groundTile: Tile,
   // tileSprite: PIXI.Sprite,
-  tileHeight: number,
+  origin: Vec2f,
   tileWidth: number,
 ): void => {
   const container = entity.drawable.container;
+  const tileHeight = tileWidth / 2;
+
   const { x, y } = computeIsometricCoordinates(
     entity.position,
-    // tileSprite.height,
     tileHeight,
     tileWidth,
   );
 
   container.position.set(
-    -(tileWidth / 2) + parentContainer.x + x + parentContainer.width / 2,
-    parentContainer.y + y,
+    origin.x + x + tileHeight,
+    origin.y + y - groundTile.elevation * tileHeight,
   );
 };

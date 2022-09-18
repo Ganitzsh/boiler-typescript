@@ -76,6 +76,10 @@ export const newFloor1 = (): Floor => {
     [0, 0, 0, 0, 0, 0, 0, 0],
   ];
   console.log(newBuilding1Drawable());
+  const building1Size = {
+    width: 2,
+    height: 2.7,
+  };
 
   const size = {
     width: layout[0].length,
@@ -90,22 +94,22 @@ export const newFloor1 = (): Floor => {
       drawable: loadGround(tileMap, layout),
     },
     entities: [
-      // {
-      //   name: 'building1-1',
-      //   position: {
-      //     x: 4,
-      //     y: 4,
-      //   },
-      //   size: building1Size,
-      //   boundingBox: newSquareBoundingBox(
-      //     {
-      //       x: 4,
-      //       y: 4,
-      //     },
-      //     building1Size,
-      //   ),
-      //   drawable: newBuilding1Drawable('building1-1'),
-      // },
+      {
+        name: 'building1-1',
+        position: {
+          x: 5,
+          y: 4,
+        },
+        size: building1Size,
+        boundingBox: newSquareBoundingBox(
+          {
+            x: 5,
+            y: 4,
+          },
+          building1Size,
+        ),
+        drawable: newBuilding1Drawable('building1-1'),
+      },
       // {
       //   name: 'building1-2',
       //   position: {
